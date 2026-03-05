@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m py_compile config.py extensions.py models.py routes.py app.py)",
+      "Bash(node -e \":*)",
+      "Bash(docker compose build --no-cache)",
+      "Bash(docker compose up -d)",
+      "Bash(docker compose ps)",
+      "Bash(curl -s -X POST http://localhost:5000/api/login -H \"Content-Type: application/json\" -d \"{\"\"email\"\":\"\"dev@demo.com\"\",\"\"password\"\":\"\"dev123\"\"}\")",
+      "Bash(python -m json.tool)",
+      "Bash(curl -s -X POST http://localhost:5000/api/login -H \"Content-Type: application/json\" -d \"{\"\"email\"\":\"\"approver@demo.com\"\",\"\"password\"\":\"\"approver123\"\"}\")",
+      "Bash(curl -s -X POST http://localhost:5000/api/login -H \"Content-Type: application/json\" -d \"{\"\"email\"\":\"\"dev@demo.com\"\",\"\"password\"\":\"\"wrong\"\"}\")",
+      "Bash(curl -s http://localhost:5000/api/deployments)",
+      "Bash(curl -s -X PUT http://localhost:5000/api/deployments/5/approve -H \"Content-Type: application/json\" -d \"{\"\"approved_by\"\":\"\"Bob Approver\"\"}\")",
+      "Bash(curl -s -X PUT http://localhost:5000/api/deployments/1/reject -H \"Content-Type: application/json\" -d \"{\"\"approved_by\"\":\"\"Bob Approver\"\"}\")",
+      "Bash(curl -s -X PUT http://localhost:5000/api/deployments/5/deploy)",
+      "Bash(curl -s -X PUT http://localhost:5000/api/deployments/1/approve -H \"Content-Type: application/json\" -d \"{\"\"approved_by\"\":\"\"Bob\"\"}\")",
+      "Bash(curl -s -X POST http://localhost:5000/api/deployments -H \"Content-Type: application/json\" -d \"{\"\"application_name\"\":\"\"test-app\"\"}\")",
+      "Bash(curl -s -X DELETE http://localhost:5000/api/deployments/5)"
+    ]
+  }
+}

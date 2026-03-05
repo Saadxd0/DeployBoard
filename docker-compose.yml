@@ -1,0 +1,79 @@
+version: "3.9"
+
+# ============================================================
+# DeployBoard — Docker Compose
+# Starts three services:
+#   mysql    → port 3306  (data layer)
+#   backend  → port 5000  (Flask API)
+#   frontend → port 3000  (React UI)
+# ============================================================
+
+services:
+
+  # ──────────────────────────────────────────────────────────
+  # 1.  MySQL Database
+  # ──────────────────────────────────────────────────────────
+  mysql:
+    image: mysql:8.0
+    container_name: deployboard-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE:      deployboard
+      MYSQL_USER:          deployuser
+      MYSQL_PASSWORD:      deploypass
+    ports:
+      - "3306:3306"
+    volumes:
+      # Mount the init script — MySQL runs it automatically on first start
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      # Persist data between container restarts
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-udeployuser", "-pdeploypass"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ──────────────────────────────────────────────────────────
+  # 2.  Flask Backend
+  # ──────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: deployboard-backend
+    restart: unless-stopped
+    environment:
+      MYSQL_HOST:     mysql          # Docker service name resolves to the mysql container
+      MYSQL_PORT:     3306
+      MYSQL_USER:     deployuser
+      MYSQL_PASSWORD: deploypass
+      MYSQL_DB:       deployboard
+      SECRET_KEY:     change-me-in-production
+    ports:
+      - "5000:5000"
+    depends_on:
+      mysql:
+        condition: service_healthy   # Wait until MySQL passes the healthcheck above
+
+  # ──────────────────────────────────────────────────────────
+  # 3.  React Frontend
+  # ──────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: deployboard-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+# ──────────────────────────────────────────────────────────
+# Named volume for MySQL data persistence
+# ──────────────────────────────────────────────────────────
+volumes:
+  mysql_data:
