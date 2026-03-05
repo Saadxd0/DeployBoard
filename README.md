@@ -1,45 +1,52 @@
-# DeployBoard — Deployment Request & Approval System
+# DeployBoard
 
-A professional 3-tier web application that simulates a **deployment approval workflow** used by DevOps teams.
-
----
-
-## Architecture
-
-```
-Browser (React)  →  Flask REST API  →  MySQL Database
-   :3000               :5000               :3306
-```
-
-| Layer     | Technology              |
-|-----------|-------------------------|
-| Frontend  | React 18, Vite, Axios   |
-| Backend   | Python, Flask, SQLAlchemy |
-| Database  | MySQL 8.0               |
+> A full-stack Deployment Request & Approval System built with React, Flask, and MySQL — fully containerized with Docker Compose.
 
 ---
 
-## Quick Start (Docker — recommended)
+## What is DeployBoard?
 
-### Prerequisites
+DeployBoard simulates a real-world DevOps deployment approval workflow.
+
+- **Developers** submit deployment requests
+- **Approvers** review and approve or reject them
+- Approved deployments can be marked as **Deployed**
+- Everything runs in Docker with a single command
+
+---
+
+## Tech Stack
+
+| Layer    | Technology                        |
+|----------|-----------------------------------|
+| Frontend | React 18, Vite, Axios             |
+| Backend  | Python, Flask, Flask-SQLAlchemy   |
+| Database | MySQL 8.0                         |
+| DevOps   | Docker, Docker Compose            |
+
+---
+
+## Getting Started
+
+### Requirements
+
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
 
 ### Run the app
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/your-username/DeployBoard.git
 cd DeployBoard
-
 docker compose up --build
 ```
 
-Wait ~30 seconds for MySQL to initialise, then open:
+Wait about 30 seconds for MySQL to initialize, then open:
 
-| Service  | URL                       |
-|----------|---------------------------|
-| Frontend | http://localhost:3000      |
-| Backend  | http://localhost:5000/api |
-| MySQL    | localhost:3306            |
+| Service  | URL                        |
+|----------|----------------------------|
+| Frontend | `http://localhost:3000`    |
+| Backend  | `http://localhost:5000/api`|
+| MySQL    | `localhost:3306`           |
 
 ### Stop the app
 
@@ -47,7 +54,7 @@ Wait ~30 seconds for MySQL to initialise, then open:
 docker compose down
 ```
 
-To also delete the database volume:
+To also remove the database volume:
 
 ```bash
 docker compose down -v
@@ -57,75 +64,118 @@ docker compose down -v
 
 ## Demo Accounts
 
-| Role      | Email                | Password     |
-|-----------|----------------------|--------------|
-| Developer | dev@demo.com         | dev123       |
-| Approver  | approver@demo.com    | approver123  |
+| Role      | Email               | Password    |
+|-----------|---------------------|-------------|
+| Developer | dev@demo.com        | dev123      |
+| Approver  | approver@demo.com   | approver123 |
 
-**Developer** can:
-- Submit new deployment requests
-- View all deployments on the dashboard
-- Delete deployment records
+---
 
-**Approver** can:
-- View all deployments on the dashboard
-- Approve or reject pending requests (Approvals page)
-- Mark approved deployments as "Deployed"
+## Features
+
+- User login with role-based access
+- Submit deployment requests (app name, version, environment, description)
+- Dashboard with live stats (total, pending, approved, deployed)
+- Approve or reject pending deployments
+- Mark approved deployments as deployed
 - Delete deployment records
+- Seed data pre-loaded on first run
 
 ---
 
 ## Deployment Lifecycle
 
 ```
-[Submitted]  →  pending
-[Approved]   →  approved  →  deployed
-[Rejected]   →  rejected
+pending  →  approved  →  deployed
+         →  rejected
 ```
 
 ---
 
 ## API Endpoints
 
-### Authentication
-| Method | Endpoint     | Description        |
-|--------|--------------|--------------------|
-| POST   | /api/login   | Login with email + password |
+| Method | Endpoint                          | Description                        |
+|--------|-----------------------------------|------------------------------------|
+| POST   | `/api/login`                      | Login with email and password      |
+| GET    | `/api/deployments`                | Get all deployment requests        |
+| POST   | `/api/deployments`                | Create a new deployment request    |
+| PUT    | `/api/deployments/:id/approve`    | Approve a pending deployment       |
+| PUT    | `/api/deployments/:id/reject`     | Reject a pending deployment        |
+| PUT    | `/api/deployments/:id/deploy`     | Mark an approved deployment as deployed |
+| DELETE | `/api/deployments/:id`            | Delete a deployment record         |
 
-### Deployments
-| Method | Endpoint                            | Description                  |
-|--------|-------------------------------------|------------------------------|
-| GET    | /api/deployments                    | List all deployments         |
-| POST   | /api/deployments                    | Create a deployment request  |
-| PUT    | /api/deployments/:id/approve        | Approve a pending deployment |
-| PUT    | /api/deployments/:id/reject         | Reject a pending deployment  |
-| PUT    | /api/deployments/:id/deploy         | Mark an approved deployment as deployed |
-| DELETE | /api/deployments/:id                | Delete a deployment record   |
+---
 
-#### POST /api/deployments — Request body
-```json
-{
-  "application_name": "payment-service",
-  "version": "v2.1.0",
-  "environment": "staging",
-  "description": "Add Stripe v3 integration",
-  "requested_by": "Alice Developer"
-}
+## Project Structure
+
+```
+DeployBoard/
+├── backend/
+│   ├── app.py            # App factory and startup
+│   ├── config.py         # Configuration from environment variables
+│   ├── extensions.py     # Shared SQLAlchemy instance
+│   ├── models.py         # User and Deployment models
+│   ├── routes.py         # API route handlers
+│   ├── requirements.txt
+│   └── Dockerfile
+│
+├── frontend/
+│   ├── src/
+│   │   ├── pages/
+│   │   │   ├── Login.jsx
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── CreateDeployment.jsx
+│   │   │   └── Approvals.jsx
+│   │   ├── components/
+│   │   │   └── DeploymentTable.jsx
+│   │   ├── App.jsx
+│   │   ├── main.jsx
+│   │   └── index.css
+│   ├── index.html
+│   ├── package.json
+│   ├── vite.config.js
+│   └── Dockerfile
+│
+├── database/
+│   └── init.sql          # Schema and seed data
+│
+├── docker-compose.yml
+└── README.md
 ```
 
 ---
 
-## Running Locally (without Docker)
+## Environment Variables
+
+### Backend
+
+| Variable        | Default     | Description           |
+|-----------------|-------------|-----------------------|
+| `MYSQL_HOST`    | localhost   | MySQL hostname        |
+| `MYSQL_PORT`    | 3306        | MySQL port            |
+| `MYSQL_USER`    | deployuser  | MySQL username        |
+| `MYSQL_PASSWORD`| deploypass  | MySQL password        |
+| `MYSQL_DB`      | deployboard | Database name         |
+| `SECRET_KEY`    | (insecure)  | Flask secret key      |
+
+### Frontend
+
+| Variable       | Default                 | Description          |
+|----------------|-------------------------|----------------------|
+| `VITE_API_URL` | `http://localhost:5000` | Backend API base URL |
+
+---
+
+## Running Locally Without Docker
 
 ### Backend
 
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate      # Windows: venv\Scripts\activate
+source venv/bin/activate     # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
-# Set environment variables (or edit config.py defaults)
 export MYSQL_HOST=localhost
 export MYSQL_USER=deployuser
 export MYSQL_PASSWORD=deploypass
@@ -142,62 +192,8 @@ npm install
 npm run dev
 ```
 
-App will be available at http://localhost:3000
-
 ---
 
-## Project Structure
+## License
 
-```
-DeployBoard/
-├── backend/
-│   ├── app.py           # Flask app factory + startup
-│   ├── config.py        # Configuration (reads env vars)
-│   ├── extensions.py    # Shared SQLAlchemy instance
-│   ├── models.py        # User and Deployment ORM models
-│   ├── routes.py        # All API route handlers
-│   ├── requirements.txt
-│   └── Dockerfile
-│
-├── frontend/
-│   ├── src/
-│   │   ├── pages/
-│   │   │   ├── Login.jsx           # Login form
-│   │   │   ├── Dashboard.jsx       # Main view with stats + table
-│   │   │   ├── CreateDeployment.jsx# New deployment request form
-│   │   │   └── Approvals.jsx       # Approve / reject pending requests
-│   │   ├── components/
-│   │   │   └── DeploymentTable.jsx # Reusable deployments table
-│   │   ├── App.jsx                 # Router + protected routes
-│   │   ├── main.jsx                # React entry point
-│   │   └── index.css               # All global styles
-│   ├── index.html
-│   ├── package.json
-│   ├── vite.config.js
-│   └── Dockerfile
-│
-├── database/
-│   └── init.sql         # Schema + seed data (runs on first MySQL start)
-│
-├── docker-compose.yml
-└── README.md
-```
-
----
-
-## Environment Variables
-
-### Backend
-| Variable       | Default      | Description              |
-|----------------|--------------|--------------------------|
-| MYSQL_HOST     | localhost    | MySQL hostname           |
-| MYSQL_PORT     | 3306         | MySQL port               |
-| MYSQL_USER     | deployuser   | MySQL username           |
-| MYSQL_PASSWORD | deploypass   | MySQL password           |
-| MYSQL_DB       | deployboard  | Database name            |
-| SECRET_KEY     | (insecure)   | Flask secret key         |
-
-### Frontend
-| Variable       | Default                   | Description         |
-|----------------|---------------------------|---------------------|
-| VITE_API_URL   | http://localhost:5000     | Backend API base URL |
+MIT
