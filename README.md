@@ -168,7 +168,7 @@ DeployBoard/
 
 ## Running Locally Without Docker
 
-### Backend
+### Backend:
 
 ```bash
 cd backend
