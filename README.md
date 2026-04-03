@@ -1,6 +1,6 @@
 # DeployBoard
 
-> A full-stack Deployment Request & Approval System built with React, Flask, and MySQL — fully containerized with Docker Compose.
+> A full-stack Deployment Request & Approval System built with React, Flask, and MySQL — fully containerized with Docker Compose
 
 ---
 
